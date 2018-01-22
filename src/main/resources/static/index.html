@@ -1,0 +1,67 @@
+
+
+<html>
+<head>
+    <title>WebSocket Demmo</title>
+    <script src="/sockjs.js"></script>
+    <script src="/stomp.js"></script>
+    <script type="text/javascript">
+
+        var stompClient = null;
+        var subscribedTo = null;
+        var networkEvent = 0;
+
+        function setConnected(connected) {
+            document.getElementById('connect').disabled = connected;
+            document.getElementById('disconnect').disabled = !connected;
+            document.getElementById('siteResponse').innerHTML = '';
+        }
+
+        function connect() {
+            networkEvent = 0;
+            var socket = new SockJS('/stompEndpoint');
+			stompClient = Stomp.over(socket);
+            stompClient.connect({}, function(frame) {
+                setConnected(true);
+                console.log('Connected: ' + frame);
+            });
+        }
+
+        function disconnect() {
+            stompClient.disconnect();
+            setConnected(false);
+            console.log("Disconnected");
+        }
+
+        function subscribe() {
+            if (subscribedTo) subscribedTo.unsubscribe();
+            subscribedTo = stompClient.subscribe('/topic', function(networkEvent){
+                showResult(networkEvent.body);
+            });
+        }
+
+        function showResult(message) {
+        document.getElementById('siteResponse').innerHTML = document.getElementById('siteResponse').innerHTML + '<br>'+message + '<br>'+'<br>';
+
+        }
+
+
+
+    </script>
+</head>
+<body>
+<noscript><h2>Enable Java script and reload this page to run Websocket Demo</h2></noscript>
+<h1>Events WebSocket Demo</h1>
+<div>
+    <div>
+        <button id="connect" onclick="connect();">Connect</button>
+        <button id="disconnect" disabled="disabled" onclick="disconnect();">Disconnect</button>
+        <button onclick="subscribe();">Subscribe</button>
+        <br/><br/>
+    </div>
+    <div id="siteDiv">
+        <p id="siteResponse"></p>
+    </div>
+</div>
+</body>
+</html>
